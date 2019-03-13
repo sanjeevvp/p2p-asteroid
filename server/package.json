@@ -1,0 +1,17 @@
+{
+  "name": "p2p-server",
+  "version": "1.0.0",
+  "description": "Game management server for p2p asteroid",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Sanjeev Ponnapula",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "uniqid": "^5.0.3"
+  }
+}

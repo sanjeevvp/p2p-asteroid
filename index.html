@@ -1,0 +1,78 @@
+<html>
+    <head>
+        <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" rel="stylesheet">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+        <title>asteroid.io</title>
+    </head>
+    <body>
+        <div id="app">
+            <v-app>
+                <v-content>
+                    <v-container>
+                        <v-layout v-if="connected" column justify-top align-center fill-height>
+                            <h1>Asteroid.io</h1>
+                            <h4 class="mb-3 grey--text">Find a game and connect</h4>
+                            <div v-for="game in games" :key="game.id">
+                                <v-btn color="snow" @click="connectToGame(game.id)">
+                                    <span class="mr-2">{{ game.name }}</span><br><span class="grey--text">{{game.players.length}} players</span>
+                                </v-btn>
+                            </div>
+                            <v-dialog
+                                v-model="dialog"
+                                width="500"
+                                >
+                                <template v-slot:activator="{ on }">
+                                    <v-btn
+                                    color="green lighten-2"
+                                    v-on="on"
+                                    >
+                                    Create new game
+                                    </v-btn>
+                                </template>
+
+                                <v-card>
+                                    <v-card-title
+                                    class="text-xs-center headline grey lighten-2"
+                                    primary-title
+                                    >
+                                    Create new game on the server
+                                    </v-card-title>
+
+                                    <v-card-text class="pa-3">
+                                        <v-layout column>
+                                            <v-text-field v-model="newGameName" placeholder="Enter your game name"/>
+                                        </v-layout>
+                                    </v-card-text>
+
+                                    <v-divider></v-divider>
+
+                                    <v-card-actions>
+                                    <v-spacer></v-spacer>
+                                    <v-btn
+                                        color="primary"
+                                        flat
+                                        @click="createNewGame"
+                                    >
+                                        I accept
+                                    </v-btn>
+                                    </v-card-actions>
+                                </v-card>
+                            </v-dialog>
+                        </v-layout>
+                        <v-layout v-else column justify-space-around align-center fill-height>
+                            <h1>Connected to game: {{main.name}}</h1>
+                            
+                        </v-layout>
+                    </v-container>
+                </v-content>
+            </v-app>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/peerjs@0.3.20/dist/peer.min.js"></script>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
+        <script src="./asteroids.js"></script>
+        <script src="./vue.js"></script>
+    </body>
+</html>
