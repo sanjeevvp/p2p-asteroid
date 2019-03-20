@@ -1,46 +1,78 @@
-const express = require("express");
-var cors = require("cors");
-const bodyParser = require("body-parser");
-const { createGameObject, createPlayerId } = require("./utils");
+var app = require("express")();
+var http = require("http").Server(app);
+var io = require("socket.io")(http);
 
-const app = express();
-app.use(cors());
-app.use(bodyParser.json());
+//game vars
+var serverParticlePool;
+var serverparticles;
 
-const port = 3000;
+var existing = false;
+var serverbulletPool;
+var serverbullets;
 
-var games = [];
+var players = 0;
+var serverasteroidPool;
+var serverasteroids;
 
-app.get("/games", (req, res) => res.send(games));
+var hScan;
+var asteroidVelFactor = 0;
 
-app.post("/game/create", (req, res) => {
-  const { gameName } = req.body;
-  const gameObject = createGameObject(gameName);
-  console.log("----------Object created------------");
-  console.log(gameObject);
-  games.push(gameObject);
-  res.status(200).send(gameObject);
-});
-
-app.post("/game/add-player", (req, res) => {
-  console.log("----------Adding player-------------");
-  const { id } = req.body;
-  games.filter(game => game.id === id);
-
-  if (games.filter(game => game.id === id).length === 0) {
-    res.sendStatus(401);
+io.on("connection", function(socket) {
+  socket.on("disconnect", function() {
+    console.log("Player disconnected");
+    players--;
+  });
+  console.log("Player Connected");
+  players++;
+  io.emit("init", { existing, players });
+  if (existing) {
+    io.emit("game", {
+      serverParticlePool,
+      serverparticles,
+      serverbulletPool,
+      serverbullets,
+      serverasteroidPool,
+      serverasteroids
+    });
+  } else {
+    socket.on("asteroidInit", function(data) {
+      const { asteroidPool, asteroids } = data;
+      serverasteroids = asteroids;
+      serverasteroidPool = asteroidPool;
+      existing = true;
+    });
+    socket.on("bulletInit", function(data) {
+      const { bulletPool, bullets } = data;
+      serverbullets = bullets;
+      serverbulletPool = bulletPool;
+      existing = true;
+    });
+    socket.on("particleInit", function(data) {
+      const { ParticlePool, particles } = data;
+      serverparticles = particles;
+      serverParticlePool = ParticlePool;
+      existing = true;
+    });
   }
-  
-
-  const playerId = createPlayerId(games.filter(game => game.id === id)[0]);
-  games.filter(game => game.id === id)[0].players.push(playerId);
-
-  res.send({ playerId });
-  res.status(200);
+  socket.on("update", function(data) {
+    // console.log("update received from player");
+    serverParticlePool = data.particlePool;
+    serverparticles = data.particles;
+    serverbulletPool = data.bulletPool;
+    serverbullets = data.bullets;
+    serverasteroidPool = data.asteroidPool;
+    serverasteroids = data.asteroids;
+    io.emit("clientUpdate", {
+      serverParticlePool,
+      serverparticles,
+      serverbulletPool,
+      serverbullets,
+      serverasteroidPool,
+      serverasteroids
+    });
+  });
 });
 
-app.post("/game/details", (req, res) => {
-  res.send(games.filter(game => game.id === req.body.id)[0]);
+http.listen(3000, function() {
+  console.log("listening on *:3000");
 });
-
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
